@@ -10,7 +10,7 @@ import android.view.MenuItem;
 import cn.orz.pascal.mml.utils.JavaScriptEvaluator;
 
 public class MainActivity extends Activity {
-
+    MikuConView mainView;
     /**
      * The serialization (saved instance state) Bundle key representing the
      * current dropdown position.
@@ -22,7 +22,8 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         try {
-            setContentView(new MikuConView(this));
+            this.mainView = new MikuConView(this);
+            setContentView(this.mainView);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -52,5 +53,10 @@ public class MainActivity extends Activity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        this.mainView.initScreen();
     }
 }

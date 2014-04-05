@@ -2,13 +2,10 @@ package cn.orz.pascal.mml;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Point;
 import android.os.Handler;
 import android.util.Log;
-import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 
 import java.lang.*;
 import java.util.Date;
@@ -21,31 +18,32 @@ import java.util.TimerTask;
  * Created by koduki on 12/22/13.
  */
 public class MikuConView extends View {
+    final Map<Runnable, Integer> animationQueue = new HashMap<Runnable, Integer>();
+    final Context context;
 
-    final Character character;
-    final Dialog dialog;
-    final Map<Runnable, Integer> animationQueue;
+    Character character;
+    Dialog dialog;
+
+    private boolean isInitializedScreen;
 
     public MikuConView(Context context) throws InterruptedException {
         super(context);
+        this.context = context;
+        this.isInitializedScreen = false;
 
-        // WindowManager取得
-        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        this.startAnimation();
+    }
 
-        // Displayインスタンス生成
-        Display disp = wm.getDefaultDisplay();
-        Point size = new Point();
-        disp.getSize(size);
+    public void initScreen() {
+        if(this.isInitializedScreen == false) {
+            this.character = new Character(context, this.getHeight(), this.getWidth());
+            this.dialog = new Dialog(10, 10, 150, 150);
 
-        int width = size.x;
-        int height = disp.getHeight();
+            isInitializedScreen = true;
+        }
+    }
 
-        this.character = new Character(context, height, width);
-        this.dialog = new Dialog(10, 10, 150, 150);
-
-        this.animationQueue = new HashMap<Runnable, Integer>();
-
-
+    void startAnimation() {
         final Handler handler = new Handler();
         final Runnable requestRedraw = new Runnable() {
             @Override
@@ -57,10 +55,12 @@ public class MikuConView extends View {
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
-                Log.d("TEST", "タスク実行2" + new Date());
+                Log.d("TEST", "タスク実行2\t" + new Date());
                 for (Map.Entry<Runnable, Integer> event : animationQueue.entrySet()) {
+                    Log.i("TEST", "key:"+ event.getKey() +"\t" + "key:"+ event.getValue()+"\t"+"queue size:" + animationQueue.size());
                     if (event.getValue() == 0) {
                         event.getKey().run();
+                        animationQueue.remove(event.getKey());
                     } else {
                         animationQueue.put(event.getKey(), event.getValue() - 1);
                     }
